@@ -3,6 +3,7 @@
 
 // init project
 var express = require('express');
+var strftime = require("strftime");
 var app = express();
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
@@ -24,9 +25,46 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get("/api/:date", function (req, res) {
+  // creating a date object
+  var date = new Date();
+  // if the given parameter is a number (timestamp)
+  if (/^\d*$/.test(req.params.date)) {
+    date.setTime(req.params.date);
+  }
+  // else we just create a new date parsing the string given
+  else {
+    date = new Date(req.params.date);
+  }
+
+  // giving headers for JSON
+  res.set({ "Content-Type": "application/json" });
+  // if the date is invalid
+  if (!date.getTime())
+    res.send(JSON.stringify({ error: "Invalid Date" }));
+  // else, we send the object with two members (unix and natural)
+  else
+    res.send(
+      JSON.stringify({
+        unix: date.getTime(),
+        utc: date.toUTCString(),
+      })
+    );
+});
+
+app.get("/api", function (req, res) {
+  return res.json({
+    unix: new Date().getTime(),
+    utc: new Date().toUTCString(),
+  });
+});
 
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
+// var listener = app.listen(process.env.PORT, function () {
+//   console.log('Your app is listening on port ' + listener.address().port);
+// });
+
+app.listen(5000, function(){
+  console.log(`listening to 5000`)
+})
